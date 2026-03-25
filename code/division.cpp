@@ -48,6 +48,9 @@ std::string getQueryParam(const std::string& query, const std::string& key) {
 std::string buildHttpResponse(int statusCode, const std::string& statusText, const std::string& body) {
 	std::ostringstream response;
 	response << "HTTP/1.1 " << statusCode << " " << statusText << "\r\n";
+	response << "Access-Control-Allow-Origin: *\r\n";
+	response << "Access-Control-Allow-Methods: GET, OPTIONS\r\n";
+	response << "Access-Control-Allow-Headers: Content-Type\r\n";
 	response << "Content-Type: application/json\r\n";
 	response << "Content-Length: " << body.size() << "\r\n";
 	response << "Connection: close\r\n\r\n";
@@ -135,6 +138,10 @@ std::string handleRequest(const std::string& request, SQLHDBC connection) {
 	std::string version;
 
 	stream >> method >> pathAndQuery >> version;
+
+	if (method == "OPTIONS") {
+		return buildHttpResponse(204, "No Content", "");
+	}
 
 	if (method != "GET") {
 		return buildHttpResponse(405, "Method Not Allowed", "{\"error\":\"Solo se permite GET\"}");
